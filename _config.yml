@@ -226,7 +226,7 @@ jekyll-theme-WuK: # 用了wu-kan的主题，自定义样式都在这个命名空
         - | # Copyright
           <div>
             <i class="fas fa-copyright fa-fw"></i>
-            2018-2024 Verdvana
+            2024- Homer
           </div>
         - |
           <div>
@@ -271,7 +271,7 @@ jekyll-theme-WuK: # 用了wu-kan的主题，自定义样式都在这个命名空
                 document.getElementById("run_time_hour").innerHTML = setzero(hrsold);
                 document.getElementById("run_time_minute").innerHTML = setzero(minsold);
                 document.getElementById("run_time_second").innerHTML = setzero(seconds);
-              }, 1000, "10/04/2018 11:03:56") // 这是我第一篇CSDN博客的时间
+              }, 1000, "21/05/2024 10:12:10") // 这是我第一篇CSDN博客的时间
             </script>
           </div>
         - | # 不蒜子页面统计
