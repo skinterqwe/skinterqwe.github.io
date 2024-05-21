@@ -178,6 +178,7 @@ end
 ```
 4. 将包中子项导入到$unit声明域中
 由于不能在关键字module和模块端口定义之间加一个import语句，因此，对于模块端口，包名任须显示引用，例如：
+
 ```systemverilog
 module ALU
 (input definitions::instruction_t inst,
