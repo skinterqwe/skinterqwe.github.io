@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Homer's first blog"
-date:   2024-5-21 10:12:10 +0700
+date:   2024-5-21 10:12:10 +0800
 tags:
   - blog
 ---
