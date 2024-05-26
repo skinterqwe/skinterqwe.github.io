@@ -7,9 +7,9 @@ author: "Homer"
 header-img: "img/post-bg-2015.jpg"
 tags: [systemverilog]
 ---
-
-# 1. 过程块
-## 1.1 组合逻辑过程块
+# 过程块，任务和函数
+## 1.1 过程块
+### 1.1.1 组合逻辑过程块
 always_comb不需要指明敏感列表，使用阻塞赋值(=)，如果过程内部写出锁存器，则会警告或报错
 
 ```systemverilog	
@@ -23,7 +23,7 @@ end
 ***注意***：always@(*)并没有组合逻辑的语义，即可能产生latch
 
 ***注意***：如果过程块要调用函数，最好用always_comb，因为always@(*)不会推断函数中读取的信号
-## 1.2 时序逻辑过程块
+### 1.1.2 时序逻辑过程块
 always_ff，使用非阻塞赋值(<=)，如果过程内部写出组合逻辑，则会报错
 ```systemverilog
 always_ff @ (posedge clk, negedge rst_n) begin
@@ -33,7 +33,7 @@ always_ff @ (posedge clk, negedge rst_n) begin
 		q <= d;
 end
 ```
-## 1.3 锁存逻辑过程块
+### 1.1.3 锁存逻辑过程块
 always_latch，使用非阻塞赋值(<=)，如果写成其他电路，则会警告或报错
 ```systemverilog
 always_latch
@@ -41,11 +41,11 @@ always_latch
 		q <= d;
 ```
 
-# 2. 任务和函数
+## 1.2 任务和函数
 TODO
 
-# 3. for语句
-
+# 3. 过程语句
+## 3.1 for循环
 2种写法：
 比如描述一个Reduced-xor电路，如下图
 
@@ -262,3 +262,72 @@ sv允许在未命名的begin...end块中声明局部变量
  endmodule
 ```
 # 4.4 timescale
+TODO
+# 5. 层次化设计
+
+
+# 6. 接口
+## 6.1 接口的概念
+
+## 6.2 接口声明
+接口可以像模块那样拥有端口
+
+***这样，clock, resetN, test_mode不需要像分立端口那样传递给每个模块实例***
+
+例如：
+```systemverilog
+interface main_bus (input logic clock, resetN, test_mode);
+	wire [15:0] data;
+	wire [15:0] addr;
+	......
+endinterface
+```
+顶层网表如下：
+```systemverilog
+module top(input logic clock, resetN, test_mode);
+	logic [15:0] pc;
+	logic [7:0]  inst;
+
+main_bus bus(
+	.clock(clock),
+	.resetN(resetN),
+	.testmode(test_mode)
+);
+
+processor proc1(
+	.bus(bus),
+	.pc(pc),
+	.inst(inst)
+);
+endmodule
+```
+## 6.3 将端口用作模块端口
+
+### 6.3.1 显示命名的接口端口
+模块端口可以显示的声明为特定接口类型。可以把接口名称当作端口类型使用。
+例如：
+```systemverilog
+interface chip_bus;
+......
+endinterface
+
+module Cache(chip_bus pins,
+			 input clock);
+...
+endmodule
+```
+### 6.3.2 通用接口端口
+通用接口端用关键字interface定义端口类型，而不是使用特定接口类型的名称。例如：
+```systemverilog
+module RAM(  interface pins,
+			 input clock);
+...
+endmodule
+```
+当模块实例化时，任何接口都可以连接到通用接口端口上。
+
+***同一个模块可以用不同的接口连接？***例子？
+### 6.3.3 综合指导
+接口连接模块的两种方式都是可以综合的。
+
+## 6.4 接口的实例化和连接
