@@ -176,7 +176,7 @@ jekyll-theme-WuK: # 用了wu-kan的主题，自定义样式都在这个命名空
       disable: false
       avatar: # 侧边栏显示的头像
         enable: true
-        img: /static/img/avatar.jpg # 头像的地址
+        img: /static/img/Homer.png # 头像的地址
       nav:
         - title: '<i class="fas fa-home fa-fw"></i> 首页'
           href: /
@@ -322,12 +322,12 @@ jekyll-theme-WuK: # 用了wu-kan的主题，自定义样式都在这个命名空
         />
         <link
           rel="apple-touch-icon-precomposed"
-          href="/static/img/avatar.jpg"
+          href="/static/img/Homer.png"
         />
         <link
           rel="shortcut
           icon"
-          href="/static/img/avatar.jpg"
+          href="/static/img/Homer.png"
         />
         <link
           rel="stylesheet"

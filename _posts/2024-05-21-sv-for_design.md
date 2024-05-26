@@ -7,9 +7,9 @@ author: "Homer"
 header-img: "img/post-bg-2015.jpg"
 tags: [systemverilog]
 ---
-# 过程块，任务和函数
-## 1.1 过程块
-### 1.1.1 组合逻辑过程块
+
+# 1. 过程块
+## 1.1 组合逻辑过程块
 always_comb不需要指明敏感列表，使用阻塞赋值(=)，如果过程内部写出锁存器，则会警告或报错
 
 ```systemverilog	
@@ -23,7 +23,7 @@ end
 ***注意***：always@(*)并没有组合逻辑的语义，即可能产生latch
 
 ***注意***：如果过程块要调用函数，最好用always_comb，因为always@(*)不会推断函数中读取的信号
-### 1.1.2 时序逻辑过程块
+## 1.2 时序逻辑过程块
 always_ff，使用非阻塞赋值(<=)，如果过程内部写出组合逻辑，则会报错
 ```systemverilog
 always_ff @ (posedge clk, negedge rst_n) begin
@@ -33,7 +33,7 @@ always_ff @ (posedge clk, negedge rst_n) begin
 		q <= d;
 end
 ```
-### 1.1.3 锁存逻辑过程块
+## 1.3 锁存逻辑过程块
 always_latch，使用非阻塞赋值(<=)，如果写成其他电路，则会警告或报错
 ```systemverilog
 always_latch
@@ -41,11 +41,11 @@ always_latch
 		q <= d;
 ```
 
-## 1.2 任务和函数
+# 2. 任务和函数
 TODO
 
-# 3. 过程语句
-## 3.1 for循环
+# 3. for语句
+
 2种写法：
 比如描述一个Reduced-xor电路，如下图
 
@@ -126,6 +126,7 @@ TODO
 包含以下几个内容：package, $unit编译声明空间, 未命名块中的声明, timescale
 ## 4.1 package
 package中可以包含的可综合的结构有：
+
 1. parameter和localparameter常量定义
 2. const常量定义？
 3. typedef用户定义类型
@@ -178,6 +179,7 @@ end
 ```
 4. 将包中子项导入到$unit声明域中
 由于不能在关键字module和模块端口定义之间加一个import语句，因此，对于模块端口，包名任须显示引用，例如：
+
 ```systemverilog
 module ALU
 (input definitions::instruction_t inst,
