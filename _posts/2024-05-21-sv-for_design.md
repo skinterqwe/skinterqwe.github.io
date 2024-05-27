@@ -333,3 +333,178 @@ endmodule
 接口连接模块的两种方式都是可以综合的。
 
 ## 6.4 接口的实例化和连接
+***接口类型的端口如果没有连接是非法的***
+模块实例的input, output和inout类型的端口可以没有任何连接。对于接口类型的端口则不行。
+
+接口的端口也可以定义为一个接口
+
+## 6.5 接口内部信号的引用
+例如
+```systemverilog
+always @ (posedge bus.clock, negedge bus.resetN)
+...
+```
+## 6.6 接口的modport
+***modport定义了，从模块的角度来看接口信号的端口方向***
+例如：
+```systemverilog
+interface chip_bus (input logic clock, resetN);
+	logic valid, ready;
+	logic [31:0] addr;
+	logic [31:0] data;
+
+modport master (input clock,
+				input resetN,
+				output valid,
+				input ready,
+				output addr,
+				output data);
+
+modport slave (	input clock,
+				input resetN,
+				input valid,
+				output ready,
+				input addr,
+				input data);
+```
+modport定义中不包含向量位数和类型。
+
+### 6.6.1 指定使用哪种modport方式
+1. 在模块实例的接口连接中说明
+```systemverilog
+chip_bus bus; //接口实例化
+primary i1 (bus.master) //使用master modport
+```
+2. 在模块定义的端口声明时说明
+```systemverilog
+module secondary (chip_bus.slave pins)
+```
+***以上两种方式不能同时使用***
+
+即使接口定义了modport，模块连接到接口时仍然可以不指定modport。
+但是，接口内部信号的端口方向只能在modport中定义。
+如果没有在接口连接中指定modport，那么接口中所有的线网信号将默认是双向inout信号。
+
+### 6.6.2 使用modport定义不同的连接
+
+模块只可以直接访问在modport定义中列出来的信号。这使得接口中的某些信号可以完全地对某些模块隐藏。
+
+## 6.7 在接口中使用任务和函数
+### 6.7.1 接口的方法
+
+
+### 6.7.2 接口的方法的导入
+1. 使用函数和任务的名称名称导入
+```systemverilog
+modport in(	import Read,
+			import parity_gen,
+			input clock, resetN);
+```
+2. 使用函数和任务的完整原型导入
+```systemverilog
+modport in(	import task Read(input [63:0] data,
+							 output [31:0] addr),
+			import function parity_gen(input [63:0] data),
+			input clock, resetN);
+```
+***使用从接口中导入的任务或函数的模块是可综合的。***
+***导入的函数和任务必须声明为自动类型，并且不能包含静态声明，这样才是可综合的。***
+
+下面是一个完整的例子：
+```systemverilog
+///
+// Simple AHB Interface with parity methods
+///
+interface simple_ahb (
+  input logic  hclk,    // bus transfer clk
+  input logic  hresetN  // bus reset, active low
+);
+  logic [31:0] haddr;   // transfer start address
+  logic [32:0] hwdata;  // data to slave, with parity bit
+  logic [32:0] hrdata;  // data from slave, with parity bit
+  logic [ 2:0] hsize;   // transfer size
+  logic        hwrite;  // 1 for write, 0 for read
+  logic        hready;  // 1 for transfer finished
+ 
+  function automatic logic parity_gen(logic [31:0] data);
+    return(^data); // calculate parity of data (odd parity)
+  endfunction
+ 
+  function automatic logic parity_chk(logic [31:0] data,
+                                      logic        parity);
+    return (parity === ^data); // 1=OK, 0=parity error
+  endfunction
+ 
+  // master module port directions
+  modport master_ports (
+    output haddr, hwdata, hsize, hwrite, // to AHB slave
+    input  hrdata, hready,               // from AHB slave
+    input  hclk, hresetN,                // from chip level
+    import parity_gen, parity_check      // function import
+  );
+ 
+  // slave module port directions
+  modport slave_ports (
+    output hrdata, hready,               // to AHB master
+    input  haddr, hwdata, hsize, hwrite, // from AHB master
+    input  hclk, hresetN,                // from chip level
+    import parity_check                  // function import
+  );
+ 
+  // slave module port directions
+  modport slave_ports_alt (
+    output hrdata, hready,               // to AHB master
+    input  haddr, hwdata, hsize, hwrite, // from AHB master
+    input  hclk, hresetN,                // from chip level
+    import function logic parity_chk(logic [31:0] data,
+                                     logic        parity)
+  );
+endinterface: simple_ahb
+```
+
+## 6.8 可重构接口
+### 6.8.1 参数化接口
+
+```systemverilog
+///
+// Simple AHB Interface with pareterized bus widths
+///
+interface simple_ahb 
+#(parameter DWIDTH=32)        // Data bus width
+(
+  input logic  hclk,          // bus transfer clk
+  input logic  hresetN        // bus reset, active low
+);
+  logic [31:0]       haddr;   // transfer start address
+  logic [DWIDTH-1:0] hwdata;  // data sent to slave
+  logic [DWIDTH-1:0] hrdata;  // return data from slave
+  logic [ 2:0]       hsize;   // transfer size             
+  logic              hwrite;  // 1 for write, 0 for read
+  logic              hready;  // 1 for transfer finished
+ 
+  // master module port directions
+  modport master_ports (
+    output haddr, hwdata, hsize, hwrite, // to AHB slave
+    input  hrdata, hready,               // from AHB slave
+    input  hclk, hresetN                 // from chip level
+  );
+ 
+  // slave module port directions
+  modport slave_ports (
+    output hrdata, hready,               // to AHB master
+    input  haddr, hwdata, hsize, hwrite, // from AHB master
+    input  hclk, hresetN                 // from chip level
+  );
+endinterface: simple_ahb
+```
+例化
+```systemverilog
+simple_ahb #(.DWIDTH(64)) 
+	ahbl(.hclk,
+		 .hresetN
+) ;
+```
+
+### 6.8.2 使用generate块
+TODO
+
